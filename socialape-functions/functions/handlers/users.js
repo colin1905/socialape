@@ -5,8 +5,9 @@ const config = require('../util/config');
 const firebase = require('firebase');
 firebase.initializeApp(config);
 
-const { validateSignupData, validateLoginData } = require('../util/validators');
+const { validateSignupData, validateLoginData, reduceUserDetails } = require('../util/validators');
 
+// Sign up user
 exports.signup = (req, res) => {
   const newUser = {
     email: req.body.email,
@@ -61,6 +62,7 @@ exports.signup = (req, res) => {
     });
 };
 
+// Log in user
 exports.login = (req, res) => {
   const user = {
     email: req.body.email,
@@ -90,6 +92,44 @@ exports.login = (req, res) => {
     });
 };
 
+//add user details
+exports.addUserDetails = (req, res) => {
+  let userDetails = reduceUserDetails(req.body);
+
+  db.doc(`/users/${req.user.handle}`).update(userDetails)
+    .then(() => {
+      return res.json({ message: 'Details added successfully'});
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({error: err.code})
+    })
+}
+
+// Get own user details
+exports.getAuthenticatedUser = (req, res) => {
+  let userData = {};
+  db.doc(`/users/${req.user.handle}`).get()
+    .then(doc => {
+      if(doc.exists){
+        userData.credentials = doc.data();
+        return db.collection('likes').where('userHandle', '==', req.user.handle).get();
+      }
+    })
+    .then(data => {
+      userData.likes = [];
+      data.forEach(doc => {
+        userData.likes.push(doc.data());
+      });
+      return res.json(userData);
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    })
+}
+
+// Upload a profile image
 exports.uploadImage = (req, res) => {
   const BusBoy = require('busboy');
   const path = require('path');
@@ -102,10 +142,10 @@ exports.uploadImage = (req, res) => {
   let imageToBeUploaded = {};
 
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+    if(mimetype !== 'image/jpeg' && mimetype !== 'image/png'){
+      return res.status(400).json({ error: 'Wrong file type submitted'});
+    }
     // gets 'png' from 'my.image.png' 
-    console.log(fieldname);
-    console.log(filename);
-    console.log(mimetype);
     const imageExtension = filename.split('.')[filename.split('.').length - 1];
     const imageFileName = `${Math.round(Math.random() * 10000000)}.${imageExtension})`;
     const filepath = path.join(os.tmpdir(), imageFileName);
@@ -133,5 +173,6 @@ exports.uploadImage = (req, res) => {
       console.error(err);
       return res.status(500).json({ error: err.code });
     })
-  })
-}
+  });
+  busboy.end(req.rawBody);
+};
