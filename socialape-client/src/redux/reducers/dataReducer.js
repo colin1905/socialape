@@ -1,4 +1,3 @@
-  
 import {
   SET_SCREAMS,
   LIKE_SCREAM,
