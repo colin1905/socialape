@@ -9,6 +9,8 @@
 //   "token_uri": "https://oauth2.googleapis.com/token",
 //   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
 //   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fgrrr%40socialape-4e17c.iam.gserviceaccount.com"
+// appId: "1:1092512616884:web:1df6c451777c50b63022e1",
+// measurementId: "G-TV94T73RE6"
 // }
 
 
@@ -20,7 +22,6 @@ module.exports = {
   projectId: "socialape-4e17c",
   storageBucket: "socialape-4e17c.appspot.com",
   messagingSenderId: "1092512616884",
-  appId: "1:1092512616884:web:1df6c451777c50b63022e1",
-  measurementId: "G-TV94T73RE6"
 };
+
 
